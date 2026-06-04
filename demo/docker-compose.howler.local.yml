@@ -9,12 +9,33 @@ services:
       API__EXTERNAL_SOURCES: |
         [
           {"name": "port-lookup", "url": "http://port-lookup:5100", "classification": "TLP:CLEAR"},
+          {"name": "dns-lookup", "url": "http://dns-lookup:5107", "classification": "TLP:CLEAR"},
           {"name": "crt-sh", "url": "http://crtsh:5101", "classification": "TLP:CLEAR", "include_default": false},
           {"name": "howler", "url": "http://howler-plugin:5102", "classification": "TLP:CLEAR"},
           {"name": "malware-bazaar", "url": "http://malware-bazaar:5103", "classification": "TLP:CLEAR"},
           {"name": "virustotal", "url": "http://virustotal:5104", "classification": "TLP:CLEAR"},
           {"name": "abuseipdb", "url": "http://abuseipdb:5106", "classification": "TLP:CLEAR"}
         ]
+
+  dns-lookup:
+    build:
+      context: ../plugins/dns_lookup
+      dockerfile: ../base/plugin.Dockerfile
+      args:
+        base_plugin_version: 1.4
+    image: clue-plugin-dns-lookup:dev
+    restart: unless-stopped
+    ports:
+      - "5107:5107"
+    environment:
+      APP_NAME: dns-lookup
+      CLASSIFICATION: TLP:CLEAR
+      PORT: 5107
+      WORKERS: 1
+      CORE__REDIS__HOST: redis
+      CORE__REDIS__PORT: 6379
+    networks:
+      - clue-network
 
   crtsh:
     build:
