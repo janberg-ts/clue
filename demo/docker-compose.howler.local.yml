@@ -9,6 +9,7 @@ services:
       API__EXTERNAL_SOURCES: |
         [
           {"name": "port-lookup", "url": "http://port-lookup:5100", "classification": "TLP:CLEAR"},
+          {"name": "maxmind", "url": "http://maxmind:5110", "classification": "TLP:CLEAR"},
           {"name": "urlscan", "url": "http://urlscan:5112", "classification": "TLP:CLEAR"},
           {"name": "alienvault-otx", "url": "http://alienvault-otx:5111", "classification": "TLP:CLEAR"},
           {"name": "greynoise", "url": "http://greynoise:5113", "classification": "TLP:CLEAR"},
@@ -19,6 +20,31 @@ services:
           {"name": "virustotal", "url": "http://virustotal:5104", "classification": "TLP:CLEAR"},
           {"name": "abuseipdb", "url": "http://abuseipdb:5106", "classification": "TLP:CLEAR"}
         ]
+
+  maxmind:
+    build:
+      context: ../plugins/maxmind
+      dockerfile: ../base/plugin.Dockerfile
+      args:
+        base_plugin_version: 1.4
+    image: clue-plugin-maxmind:dev
+    restart: unless-stopped
+    ports:
+      - "5110:5110"
+    environment:
+      APP_NAME: maxmind
+      CLASSIFICATION: TLP:CLEAR
+      PORT: 5110
+      WORKERS: 1
+      CORE__REDIS__HOST: redis
+      CORE__REDIS__PORT: 6379
+      MAXMIND_ASN_DB: /data/maxmind/GeoLite2-ASN.mmdb,/usr/share/GeoIP/GeoLite2-ASN.mmdb,/var/lib/GeoIP/GeoLite2-ASN.mmdb
+      MAXMIND_COUNTRY_DB: /data/maxmind/GeoLite2-Country.mmdb,/usr/share/GeoIP/GeoLite2-Country.mmdb,/var/lib/GeoIP/GeoLite2-Country.mmdb
+      MAXMIND_CITY_DB: /data/maxmind/GeoLite2-City.mmdb,/usr/share/GeoIP/GeoLite2-City.mmdb,/var/lib/GeoIP/GeoLite2-City.mmdb
+    volumes:
+      - ${MAXMIND_DB_DIR:-./maxmind}:/data/maxmind:ro
+    networks:
+      - clue-network
 
   urlscan:
     build:
