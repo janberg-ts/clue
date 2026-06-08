@@ -9,12 +9,34 @@ services:
       API__EXTERNAL_SOURCES: |
         [
           {"name": "port-lookup", "url": "http://port-lookup:5100", "classification": "TLP:CLEAR"},
+          {"name": "alienvault-otx", "url": "http://alienvault-otx:5111", "classification": "TLP:CLEAR"},
           {"name": "crt-sh", "url": "http://crtsh:5101", "classification": "TLP:CLEAR", "include_default": false},
           {"name": "howler", "url": "http://howler-plugin:5102", "classification": "TLP:CLEAR"},
           {"name": "malware-bazaar", "url": "http://malware-bazaar:5103", "classification": "TLP:CLEAR"},
           {"name": "virustotal", "url": "http://virustotal:5104", "classification": "TLP:CLEAR"},
           {"name": "abuseipdb", "url": "http://abuseipdb:5106", "classification": "TLP:CLEAR"}
         ]
+
+  alienvault-otx:
+    build:
+      context: ../plugins/alienvault_otx
+      dockerfile: ../base/plugin.Dockerfile
+      args:
+        base_plugin_version: 1.4
+    image: clue-plugin-alienvault-otx:dev
+    restart: unless-stopped
+    ports:
+      - "5111:5111"
+    environment:
+      APP_NAME: alienvault-otx
+      CLASSIFICATION: TLP:CLEAR
+      PORT: 5111
+      WORKERS: 1
+      OTX_API_KEY: ${OTX_API_KEY:-${ALIENVAULT_API_KEY:-}}
+      CORE__REDIS__HOST: redis
+      CORE__REDIS__PORT: 6379
+    networks:
+      - clue-network
 
   crtsh:
     build:
