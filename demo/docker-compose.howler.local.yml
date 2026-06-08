@@ -10,7 +10,9 @@ services:
         [
           {"name": "port-lookup", "url": "http://port-lookup:5100", "classification": "TLP:CLEAR"},
           {"name": "maxmind", "url": "http://maxmind:5110", "classification": "TLP:CLEAR"},
+          {"name": "urlscan", "url": "http://urlscan:5112", "classification": "TLP:CLEAR"},
           {"name": "alienvault-otx", "url": "http://alienvault-otx:5111", "classification": "TLP:CLEAR"},
+          {"name": "greynoise", "url": "http://greynoise:5113", "classification": "TLP:CLEAR"},
           {"name": "shodan", "url": "http://shodan:5114", "classification": "TLP:CLEAR"},
           {"name": "crt-sh", "url": "http://crtsh:5101", "classification": "TLP:CLEAR", "include_default": false},
           {"name": "howler", "url": "http://howler-plugin:5102", "classification": "TLP:CLEAR"},
@@ -44,6 +46,27 @@ services:
     networks:
       - clue-network
 
+  urlscan:
+    build:
+      context: ../plugins/urlscan
+      dockerfile: ../base/plugin.Dockerfile
+      args:
+        base_plugin_version: 1.4
+    image: clue-plugin-urlscan:dev
+    restart: unless-stopped
+    ports:
+      - "5112:5112"
+    environment:
+      APP_NAME: urlscan
+      CLASSIFICATION: TLP:CLEAR
+      PORT: 5112
+      WORKERS: 1
+      URLSCAN_API_KEY: ${URLSCAN_API_KEY:-}
+      CORE__REDIS__HOST: redis
+      CORE__REDIS__PORT: 6379
+    networks:
+      - clue-network
+
   alienvault-otx:
     build:
       context: ../plugins/alienvault_otx
@@ -60,6 +83,27 @@ services:
       PORT: 5111
       WORKERS: 1
       OTX_API_KEY: ${OTX_API_KEY:-${ALIENVAULT_API_KEY:-}}
+      CORE__REDIS__HOST: redis
+      CORE__REDIS__PORT: 6379
+    networks:
+      - clue-network
+
+  greynoise:
+    build:
+      context: ../plugins/greynoise
+      dockerfile: ../base/plugin.Dockerfile
+      args:
+        base_plugin_version: 1.4
+    image: clue-plugin-greynoise:dev
+    restart: unless-stopped
+    ports:
+      - "5113:5113"
+    environment:
+      APP_NAME: greynoise
+      CLASSIFICATION: TLP:CLEAR
+      PORT: 5113
+      WORKERS: 1
+      GREYNOISE_API_KEY: ${GREYNOISE_API_KEY:-${GN_API_KEY:-}}
       CORE__REDIS__HOST: redis
       CORE__REDIS__PORT: 6379
     networks:
