@@ -9,12 +9,33 @@ services:
       API__EXTERNAL_SOURCES: |
         [
           {"name": "port-lookup", "url": "http://port-lookup:5100", "classification": "TLP:CLEAR"},
+          {"name": "team-cymru", "url": "http://team-cymru:5109", "classification": "TLP:CLEAR"},
           {"name": "crt-sh", "url": "http://crtsh:5101", "classification": "TLP:CLEAR", "include_default": false},
           {"name": "howler", "url": "http://howler-plugin:5102", "classification": "TLP:CLEAR"},
           {"name": "malware-bazaar", "url": "http://malware-bazaar:5103", "classification": "TLP:CLEAR"},
           {"name": "virustotal", "url": "http://virustotal:5104", "classification": "TLP:CLEAR"},
           {"name": "abuseipdb", "url": "http://abuseipdb:5106", "classification": "TLP:CLEAR"}
         ]
+
+  team-cymru:
+    build:
+      context: ../plugins/team_cymru
+      dockerfile: ../base/plugin.Dockerfile
+      args:
+        base_plugin_version: 1.4
+    image: clue-plugin-team-cymru:dev
+    restart: unless-stopped
+    ports:
+      - "5109:5109"
+    environment:
+      APP_NAME: team-cymru
+      CLASSIFICATION: TLP:CLEAR
+      PORT: 5109
+      WORKERS: 1
+      CORE__REDIS__HOST: redis
+      CORE__REDIS__PORT: 6379
+    networks:
+      - clue-network
 
   crtsh:
     build:
