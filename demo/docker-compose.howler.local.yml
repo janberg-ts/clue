@@ -9,12 +9,34 @@ services:
       API__EXTERNAL_SOURCES: |
         [
           {"name": "port-lookup", "url": "http://port-lookup:5100", "classification": "TLP:CLEAR"},
+          {"name": "urlscan", "url": "http://urlscan:5112", "classification": "TLP:CLEAR"},
           {"name": "crt-sh", "url": "http://crtsh:5101", "classification": "TLP:CLEAR", "include_default": false},
           {"name": "howler", "url": "http://howler-plugin:5102", "classification": "TLP:CLEAR"},
           {"name": "malware-bazaar", "url": "http://malware-bazaar:5103", "classification": "TLP:CLEAR"},
           {"name": "virustotal", "url": "http://virustotal:5104", "classification": "TLP:CLEAR"},
           {"name": "abuseipdb", "url": "http://abuseipdb:5106", "classification": "TLP:CLEAR"}
         ]
+
+  urlscan:
+    build:
+      context: ../plugins/urlscan
+      dockerfile: ../base/plugin.Dockerfile
+      args:
+        base_plugin_version: 1.4
+    image: clue-plugin-urlscan:dev
+    restart: unless-stopped
+    ports:
+      - "5112:5112"
+    environment:
+      APP_NAME: urlscan
+      CLASSIFICATION: TLP:CLEAR
+      PORT: 5112
+      WORKERS: 1
+      URLSCAN_API_KEY: ${URLSCAN_API_KEY:-}
+      CORE__REDIS__HOST: redis
+      CORE__REDIS__PORT: 6379
+    networks:
+      - clue-network
 
   crtsh:
     build:
